@@ -1,0 +1,18 @@
+services:
+  n8n:
+    build:
+      dockerfile: Dockerfile
+    user: root
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ../../dist:/home/node/.n8n/custom/n8n-nodes-better-stack
+    environment:
+      - N8N_USER_FOLDER=/home/node/.n8n
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
+    name: n8n_data

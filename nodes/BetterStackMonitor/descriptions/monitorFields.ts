@@ -1,0 +1,1108 @@
+import type { INodeProperties } from "n8n-workflow";
+
+export const monitorIdField: INodeProperties = {
+	displayName: "Monitor",
+	name: "monitorId",
+	type: "resourceLocator",
+	required: true,
+	default: { mode: "list", value: "" },
+	description: "The monitor to operate on",
+	displayOptions: {
+		show: {
+			operation: [
+				"get",
+				"update",
+				"delete",
+				"getResponseTimes",
+				"getAvailability",
+			],
+		},
+	},
+	modes: [
+		{
+			displayName: "From List",
+			name: "list",
+			type: "list",
+			placeholder: "Select a monitor...",
+			typeOptions: {
+				searchListMethod: "searchMonitors",
+				searchable: true,
+				searchFilterRequired: false,
+			},
+		},
+		{
+			displayName: "By ID",
+			name: "id",
+			type: "string",
+			placeholder: "123456",
+			validation: [
+				{
+					type: "regex",
+					properties: {
+						regex: "^[0-9]+$",
+						errorMessage: "Monitor ID must be a number",
+					},
+				},
+			],
+		},
+	],
+};
+
+export const monitorTypeField: INodeProperties = {
+	displayName: "Monitor Type",
+	name: "monitorType",
+	type: "options",
+	required: true,
+	default: "status",
+	description: "Type of monitoring to perform",
+	displayOptions: {
+		show: {
+			operation: ["create"],
+		},
+	},
+	options: [
+		{ name: "DNS", value: "dns", description: "Query DNS servers" },
+		{
+			name: "Expected Status Code",
+			value: "expected_status_code",
+			description: "Check for specific HTTP status codes",
+		},
+		{ name: "IMAP", value: "imap", description: "Test IMAP mail servers" },
+		{
+			name: "Keyword",
+			value: "keyword",
+			description: "Check for presence of keyword on page",
+		},
+		{
+			name: "Keyword Absence",
+			value: "keyword_absence",
+			description: "Check for absence of keyword on page",
+		},
+		{
+			name: "Ping",
+			value: "ping",
+			description: "Test host availability via ping",
+		},
+		{
+			name: "Playwright",
+			value: "playwright",
+			description: "Execute custom JavaScript scenarios",
+		},
+		{ name: "POP", value: "pop", description: "Test POP mail servers" },
+		{ name: "SMTP", value: "smtp", description: "Test SMTP mail servers" },
+		{
+			name: "Status",
+			value: "status",
+			description: "Check for 2XX HTTP status codes (default)",
+		},
+		{ name: "TCP", value: "tcp", description: "Test TCP port connectivity" },
+		{ name: "UDP", value: "udp", description: "Test UDP port connectivity" },
+	],
+};
+
+export const urlField: INodeProperties = {
+	displayName: "URL",
+	name: "url",
+	type: "string",
+	required: true,
+	default: "",
+	placeholder: "https://example.com",
+	description: "URL or host address to monitor",
+	displayOptions: {
+		show: {
+			operation: ["create"],
+		},
+	},
+};
+
+export const pronounceableNameField: INodeProperties = {
+	displayName: "Name",
+	name: "pronounceableName",
+	type: "string",
+	required: true,
+	default: "",
+	description: "Human-readable name for the monitor",
+	displayOptions: {
+		show: {
+			operation: ["create"],
+		},
+	},
+};
+
+export const returnAllField: INodeProperties = {
+	displayName: "Return All",
+	name: "returnAll",
+	type: "boolean",
+	default: false,
+	description: "Whether to return all results or only up to the limit",
+	displayOptions: {
+		show: {
+			operation: ["getMany"],
+		},
+	},
+};
+
+export const limitField: INodeProperties = {
+	displayName: "Limit",
+	name: "limit",
+	type: "number",
+	default: 50,
+	description: "Max number of results to return",
+	typeOptions: {
+		minValue: 1,
+		maxValue: 250,
+	},
+	displayOptions: {
+		show: {
+			operation: ["getMany"],
+			returnAll: [false],
+		},
+	},
+};
+
+export const dateRangeFields: INodeProperties = {
+	displayName: "Date Range",
+	name: "dateRange",
+	type: "collection",
+	placeholder: "Add Date Range",
+	default: {},
+	displayOptions: {
+		show: {
+			operation: ["getAvailability"],
+		},
+	},
+	options: [
+		{
+			displayName: "From",
+			name: "from",
+			type: "string",
+			default: "",
+			placeholder: "2026-01-01",
+			description: "Start date (YYYY-MM-DD format)",
+		},
+		{
+			displayName: "To",
+			name: "to",
+			type: "string",
+			default: "",
+			placeholder: "2026-01-31",
+			description: "End date (YYYY-MM-DD format)",
+		},
+	],
+};
+
+export const additionalFieldsCreate: INodeProperties = {
+	displayName: "Additional Fields",
+	name: "additionalFields",
+	type: "collection",
+	placeholder: "Add Field",
+	default: {},
+	displayOptions: {
+		show: {
+			operation: ["create"],
+		},
+	},
+	options: [
+		{
+			displayName: "Auth Password",
+			name: "auth_password",
+			type: "string",
+			typeOptions: { password: true },
+			default: "",
+			description: "HTTP Basic Auth password",
+		},
+		{
+			displayName: "Auth Username",
+			name: "auth_username",
+			type: "string",
+			default: "",
+			description: "HTTP Basic Auth username",
+		},
+		{
+			displayName: "Call Alerts",
+			name: "call",
+			type: "boolean",
+			default: false,
+			description: "Whether to make phone call notifications",
+		},
+		{
+			displayName: "Check Frequency",
+			name: "check_frequency",
+			type: "options",
+			default: 180,
+			description: "How often to check",
+			options: [
+				{ name: "30 seconds", value: 30 },
+				{ name: "45 seconds", value: 45 },
+				{ name: "1 minute", value: 60 },
+				{ name: "2 minutes", value: 120 },
+				{ name: "3 minutes", value: 180 },
+				{ name: "5 minutes", value: 300 },
+				{ name: "10 minutes", value: 600 },
+				{ name: "15 minutes", value: 900 },
+				{ name: "30 minutes", value: 1800 },
+			],
+		},
+		{
+			displayName: "Confirmation Period (Seconds)",
+			name: "confirmation_period",
+			type: "number",
+			default: 0,
+			description:
+				"How long the monitor must be down before triggering an incident (in seconds)",
+		},
+		{
+			displayName: "Critical Alert",
+			name: "critical_alert",
+			type: "boolean",
+			default: false,
+			description:
+				"Send a critical push notification that ignores mute switch and Do Not Disturb mode",
+		},
+		{
+			displayName: "Domain Expiration Alert",
+			name: "domain_expiration",
+			type: "options",
+			default: 7,
+			description: "Days before domain expiration to alert",
+			options: [
+				{ name: "Disabled", value: "" },
+				{ name: "1 day", value: 1 },
+				{ name: "2 days", value: 2 },
+				{ name: "3 days", value: 3 },
+				{ name: "7 days", value: 7 },
+				{ name: "14 days", value: 14 },
+				{ name: "30 days", value: 30 },
+				{ name: "60 days", value: 60 },
+			],
+		},
+		{
+			displayName: "Email Alerts",
+			name: "email",
+			type: "boolean",
+			default: true,
+			description: "Whether to send email notifications",
+		},
+		{
+			displayName: "Environment Variables",
+			name: "environment_variables",
+			type: "json",
+			default: "{}",
+			description:
+				'For Playwright monitors, environment variables that can be used in the scenario. Example: {"PASSWORD": "passw0rd"}',
+		},
+		{
+			displayName: "Escalation Policy",
+			name: "policy_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description: "Escalation policy to use for this monitor",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a policy...",
+					typeOptions: {
+						searchListMethod: "searchEscalationPolicies",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Policy ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Expiration Escalation Policy",
+			name: "expiration_policy_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description:
+				"Escalation policy for SSL certificate and domain expiration checks. When not set, an e-mail is sent to the entire team.",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a policy...",
+					typeOptions: {
+						searchListMethod: "searchEscalationPolicies",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Policy ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Expected Status Codes",
+			name: "expected_status_codes",
+			type: "string",
+			default: "",
+			placeholder: "200,201,204",
+			description: "Comma-separated list of expected status codes",
+		},
+		{
+			displayName: "Follow Redirects",
+			name: "follow_redirects",
+			type: "boolean",
+			default: true,
+			description: "Whether to follow HTTP redirects",
+		},
+		{
+			displayName: "HTTP Method",
+			name: "http_method",
+			type: "options",
+			options: [
+				{ name: "GET", value: "get" },
+				{ name: "HEAD", value: "head" },
+				{ name: "PATCH", value: "patch" },
+				{ name: "POST", value: "post" },
+				{ name: "PUT", value: "put" },
+			],
+			default: "get",
+			description: "HTTP method for requests",
+		},
+		{
+			displayName: "Maintenance Days",
+			name: "maintenance_days",
+			type: "multiOptions",
+			default: [],
+			description: "Days with maintenance windows",
+			options: [
+				{ name: "Monday", value: "mon" },
+				{ name: "Tuesday", value: "tue" },
+				{ name: "Wednesday", value: "wed" },
+				{ name: "Thursday", value: "thu" },
+				{ name: "Friday", value: "fri" },
+				{ name: "Saturday", value: "sat" },
+				{ name: "Sunday", value: "sun" },
+			],
+		},
+		{
+			displayName: "Maintenance From",
+			name: "maintenance_from",
+			type: "string",
+			default: "",
+			placeholder: "01:00:00",
+			description: "Maintenance window start time (HH:MM:SS format)",
+		},
+		{
+			displayName: "Maintenance Timezone",
+			name: "maintenance_timezone",
+			type: "string",
+			default: "UTC",
+			description:
+				"Timezone for maintenance window (e.g., UTC, America/New_York)",
+		},
+		{
+			displayName: "Maintenance To",
+			name: "maintenance_to",
+			type: "string",
+			default: "",
+			placeholder: "03:00:00",
+			description: "Maintenance window end time (HH:MM:SS format)",
+		},
+		{
+			displayName: "Monitor Group",
+			name: "monitor_group_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description: "Monitor group to assign this monitor to",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a group...",
+					typeOptions: {
+						searchListMethod: "searchMonitorGroups",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Group ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Paused",
+			name: "paused",
+			type: "boolean",
+			default: false,
+			description: "Whether the monitor should be paused",
+		},
+		{
+			displayName: "Playwright Script",
+			name: "playwright_script",
+			type: "string",
+			typeOptions: { rows: 10 },
+			default: "",
+			description: "JavaScript source code for Playwright scenario",
+		},
+		{
+			displayName: "Port",
+			name: "port",
+			type: "number",
+			default: 443,
+			description: "Port number (for TCP, UDP, SMTP, POP, IMAP monitors)",
+		},
+		{
+			displayName: "Recovery Period",
+			name: "recovery_period",
+			type: "options",
+			default: 180,
+			description: "Time of uptime required before resolving incident",
+			options: [
+				{ name: "Immediate", value: 0 },
+				{ name: "1 minute", value: 60 },
+				{ name: "3 minutes", value: 180 },
+				{ name: "5 minutes", value: 300 },
+				{ name: "15 minutes", value: 900 },
+				{ name: "30 minutes", value: 1800 },
+				{ name: "1 hour", value: 3600 },
+				{ name: "2 hours", value: 7200 },
+			],
+		},
+		{
+			displayName: "Regions",
+			name: "regions",
+			type: "multiOptions",
+			options: [
+				{ name: "Asia", value: "as" },
+				{ name: "Australia", value: "au" },
+				{ name: "Europe", value: "eu" },
+				{ name: "United States", value: "us" },
+			],
+			default: ["us", "eu"],
+			description: "Geographic regions to check from",
+		},
+		{
+			displayName: "Request Body",
+			name: "request_body",
+			type: "string",
+			default: "",
+			description: "Request body for POST/PUT/PATCH requests",
+		},
+		{
+			displayName: "Request Headers",
+			name: "request_headers",
+			type: "json",
+			default: "{}",
+			description: "JSON object of request headers",
+		},
+		{
+			displayName: "Request Timeout",
+			name: "request_timeout",
+			type: "options",
+			default: 30,
+			description: "Request timeout",
+			options: [
+				{ name: "500 ms", value: 0.5 },
+				{ name: "1 second", value: 1 },
+				{ name: "2 seconds", value: 2 },
+				{ name: "3 seconds", value: 3 },
+				{ name: "5 seconds", value: 5 },
+				{ name: "10 seconds", value: 10 },
+				{ name: "15 seconds", value: 15 },
+				{ name: "30 seconds", value: 30 },
+				{ name: "45 seconds", value: 45 },
+				{ name: "60 seconds", value: 60 },
+			],
+		},
+		{
+			displayName: "Remember Cookies",
+			name: "remember_cookies",
+			type: "boolean",
+			default: false,
+			description: "Retain cookies during redirects",
+		},
+		{
+			displayName: "Required Keyword",
+			name: "required_keyword",
+			type: "string",
+			default: "",
+			description: "Keyword that must be present (for keyword monitors)",
+		},
+		{
+			displayName: "Scenario Name",
+			name: "scenario_name",
+			type: "string",
+			default: "",
+			description: "UI identifier for Playwright scenario",
+		},
+		{
+			displayName: "SMS Alerts",
+			name: "sms",
+			type: "boolean",
+			default: false,
+			description: "Whether to send SMS notifications",
+		},
+		{
+			displayName: "SSL Expiration Alert",
+			name: "ssl_expiration",
+			type: "options",
+			default: 7,
+			description: "Days before SSL expiration to alert",
+			options: [
+				{ name: "Disabled", value: "" },
+				{ name: "1 day", value: 1 },
+				{ name: "2 days", value: 2 },
+				{ name: "3 days", value: 3 },
+				{ name: "7 days", value: 7 },
+				{ name: "14 days", value: 14 },
+				{ name: "30 days", value: 30 },
+				{ name: "60 days", value: 60 },
+			],
+		},
+		{
+			displayName: "Team Name",
+			name: "team_name",
+			type: "string",
+			default: "",
+			description:
+				"Required if using global API token to specify the team which should own the resource",
+		},
+		{
+			displayName: "Team Wait (Seconds)",
+			name: "team_wait",
+			type: "number",
+			default: 0,
+			description:
+				"Seconds to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
+		},
+		{
+			displayName: "Verify SSL",
+			name: "verify_ssl",
+			type: "boolean",
+			default: true,
+			description: "Whether to verify SSL certificates",
+		},
+	],
+};
+
+export const updateFields: INodeProperties = {
+	displayName: "Update Fields",
+	name: "updateFields",
+	type: "collection",
+	placeholder: "Add Field",
+	default: {},
+	displayOptions: {
+		show: {
+			operation: ["update"],
+		},
+	},
+	options: [
+		{
+			displayName: "Auth Password",
+			name: "auth_password",
+			type: "string",
+			typeOptions: { password: true },
+			default: "",
+			description: "HTTP Basic Auth password",
+		},
+		{
+			displayName: "Auth Username",
+			name: "auth_username",
+			type: "string",
+			default: "",
+			description: "HTTP Basic Auth username",
+		},
+		{
+			displayName: "Call Alerts",
+			name: "call",
+			type: "boolean",
+			default: false,
+			description: "Whether to make phone call notifications",
+		},
+		{
+			displayName: "Check Frequency",
+			name: "check_frequency",
+			type: "options",
+			default: 180,
+			description: "How often to check",
+			options: [
+				{ name: "30 seconds", value: 30 },
+				{ name: "45 seconds", value: 45 },
+				{ name: "1 minute", value: 60 },
+				{ name: "2 minutes", value: 120 },
+				{ name: "3 minutes", value: 180 },
+				{ name: "5 minutes", value: 300 },
+				{ name: "10 minutes", value: 600 },
+				{ name: "15 minutes", value: 900 },
+				{ name: "30 minutes", value: 1800 },
+			],
+		},
+		{
+			displayName: "Confirmation Period (Seconds)",
+			name: "confirmation_period",
+			type: "number",
+			default: 0,
+			description:
+				"How long the monitor must be down before triggering an incident",
+		},
+		{
+			displayName: "Critical Alert",
+			name: "critical_alert",
+			type: "boolean",
+			default: false,
+			description:
+				"Send a critical push notification that ignores mute switch and Do Not Disturb mode",
+		},
+		{
+			displayName: "Domain Expiration Alert",
+			name: "domain_expiration",
+			type: "options",
+			default: 7,
+			description: "Days before domain expiration to alert",
+			options: [
+				{ name: "Disabled", value: "" },
+				{ name: "1 day", value: 1 },
+				{ name: "2 days", value: 2 },
+				{ name: "3 days", value: 3 },
+				{ name: "7 days", value: 7 },
+				{ name: "14 days", value: 14 },
+				{ name: "30 days", value: 30 },
+				{ name: "60 days", value: 60 },
+			],
+		},
+		{
+			displayName: "Email Alerts",
+			name: "email",
+			type: "boolean",
+			default: true,
+			description: "Whether to send email notifications",
+		},
+		{
+			displayName: "Environment Variables",
+			name: "environment_variables",
+			type: "json",
+			default: "{}",
+			description:
+				'For Playwright monitors, environment variables that can be used in the scenario. Example: {"PASSWORD": "passw0rd"}',
+		},
+		{
+			displayName: "Escalation Policy",
+			name: "policy_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description: "Escalation policy to use for this monitor",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a policy...",
+					typeOptions: {
+						searchListMethod: "searchEscalationPolicies",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Policy ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Expiration Escalation Policy",
+			name: "expiration_policy_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description:
+				"Escalation policy for SSL certificate and domain expiration checks. When not set, an e-mail is sent to the entire team.",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a policy...",
+					typeOptions: {
+						searchListMethod: "searchEscalationPolicies",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Policy ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Expected Status Codes",
+			name: "expected_status_codes",
+			type: "string",
+			default: "",
+			placeholder: "200,201,204",
+			description: "Comma-separated list of expected status codes",
+		},
+		{
+			displayName: "Follow Redirects",
+			name: "follow_redirects",
+			type: "boolean",
+			default: true,
+			description: "Whether to follow HTTP redirects",
+		},
+		{
+			displayName: "HTTP Method",
+			name: "http_method",
+			type: "options",
+			options: [
+				{ name: "GET", value: "get" },
+				{ name: "HEAD", value: "head" },
+				{ name: "PATCH", value: "patch" },
+				{ name: "POST", value: "post" },
+				{ name: "PUT", value: "put" },
+			],
+			default: "get",
+			description: "HTTP method for requests",
+		},
+		{
+			displayName: "IP Version",
+			name: "ip_version",
+			type: "options",
+			options: [
+				{ name: "Both", value: "" },
+				{ name: "IPv4", value: "ipv4" },
+				{ name: "IPv6", value: "ipv6" },
+			],
+			default: "",
+			description: "IP version for requests",
+		},
+		{
+			displayName: "Maintenance Days",
+			name: "maintenance_days",
+			type: "multiOptions",
+			default: [],
+			description: "Days with maintenance windows",
+			options: [
+				{ name: "Monday", value: "mon" },
+				{ name: "Tuesday", value: "tue" },
+				{ name: "Wednesday", value: "wed" },
+				{ name: "Thursday", value: "thu" },
+				{ name: "Friday", value: "fri" },
+				{ name: "Saturday", value: "sat" },
+				{ name: "Sunday", value: "sun" },
+			],
+		},
+		{
+			displayName: "Maintenance From",
+			name: "maintenance_from",
+			type: "string",
+			default: "",
+			placeholder: "01:00:00",
+			description: "Maintenance window start time (HH:MM:SS format)",
+		},
+		{
+			displayName: "Maintenance Timezone",
+			name: "maintenance_timezone",
+			type: "string",
+			default: "UTC",
+			description:
+				"Timezone for maintenance window (e.g., UTC, America/New_York)",
+		},
+		{
+			displayName: "Maintenance To",
+			name: "maintenance_to",
+			type: "string",
+			default: "",
+			placeholder: "03:00:00",
+			description: "Maintenance window end time (HH:MM:SS format)",
+		},
+		{
+			displayName: "Monitor Group",
+			name: "monitor_group_id",
+			type: "resourceLocator",
+			default: { mode: "list", value: "" },
+			description: "Monitor group to assign this monitor to",
+			modes: [
+				{
+					displayName: "From List",
+					name: "list",
+					type: "list",
+					placeholder: "Select a group...",
+					typeOptions: {
+						searchListMethod: "searchMonitorGroups",
+						searchable: true,
+						searchFilterRequired: false,
+					},
+				},
+				{
+					displayName: "By ID",
+					name: "id",
+					type: "string",
+					placeholder: "123456",
+					validation: [
+						{
+							type: "regex",
+							properties: {
+								regex: "^[0-9]+$",
+								errorMessage: "Group ID must be a number",
+							},
+						},
+					],
+				},
+			],
+		},
+		{
+			displayName: "Name",
+			name: "pronounceable_name",
+			type: "string",
+			default: "",
+			description: "Human-readable name for the monitor",
+		},
+		{
+			displayName: "Paused",
+			name: "paused",
+			type: "boolean",
+			default: false,
+			description: "Whether the monitor should be paused",
+		},
+		{
+			displayName: "Playwright Script",
+			name: "playwright_script",
+			type: "string",
+			typeOptions: { rows: 10 },
+			default: "",
+			description: "JavaScript source code for Playwright scenario",
+		},
+		{
+			displayName: "Port",
+			name: "port",
+			type: "number",
+			default: 443,
+			description: "Port number",
+		},
+		{
+			displayName: "Push Alerts",
+			name: "push",
+			type: "boolean",
+			default: true,
+			description: "Whether to send push notifications",
+		},
+		{
+			displayName: "Recovery Period",
+			name: "recovery_period",
+			type: "options",
+			default: 180,
+			description: "Time of uptime required before resolving incident",
+			options: [
+				{ name: "Immediate", value: 0 },
+				{ name: "1 minute", value: 60 },
+				{ name: "3 minutes", value: 180 },
+				{ name: "5 minutes", value: 300 },
+				{ name: "15 minutes", value: 900 },
+				{ name: "30 minutes", value: 1800 },
+				{ name: "1 hour", value: 3600 },
+				{ name: "2 hours", value: 7200 },
+			],
+		},
+		{
+			displayName: "Regions",
+			name: "regions",
+			type: "multiOptions",
+			options: [
+				{ name: "Asia", value: "as" },
+				{ name: "Australia", value: "au" },
+				{ name: "Europe", value: "eu" },
+				{ name: "United States", value: "us" },
+			],
+			default: [],
+			description: "Geographic regions to check from",
+		},
+		{
+			displayName: "Request Body",
+			name: "request_body",
+			type: "string",
+			default: "",
+			description: "Request body for POST/PUT/PATCH requests",
+		},
+		{
+			displayName: "Request Headers",
+			name: "request_headers",
+			type: "json",
+			default: "{}",
+			description: "JSON object of request headers",
+		},
+		{
+			displayName: "Request Timeout",
+			name: "request_timeout",
+			type: "options",
+			default: 30,
+			description: "Request timeout",
+			options: [
+				{ name: "500 ms", value: 0.5 },
+				{ name: "1 second", value: 1 },
+				{ name: "2 seconds", value: 2 },
+				{ name: "3 seconds", value: 3 },
+				{ name: "5 seconds", value: 5 },
+				{ name: "10 seconds", value: 10 },
+				{ name: "15 seconds", value: 15 },
+				{ name: "30 seconds", value: 30 },
+				{ name: "45 seconds", value: 45 },
+				{ name: "60 seconds", value: 60 },
+			],
+		},
+		{
+			displayName: "Remember Cookies",
+			name: "remember_cookies",
+			type: "boolean",
+			default: false,
+			description: "Retain cookies during redirects",
+		},
+		{
+			displayName: "Required Keyword",
+			name: "required_keyword",
+			type: "string",
+			default: "",
+			description: "Keyword that must be present (for keyword monitors)",
+		},
+		{
+			displayName: "Scenario Name",
+			name: "scenario_name",
+			type: "string",
+			default: "",
+			description: "UI identifier for Playwright scenario",
+		},
+		{
+			displayName: "SMS Alerts",
+			name: "sms",
+			type: "boolean",
+			default: false,
+			description: "Whether to send SMS notifications",
+		},
+		{
+			displayName: "SSL Expiration Alert",
+			name: "ssl_expiration",
+			type: "options",
+			default: 7,
+			description: "Days before SSL expiration to alert",
+			options: [
+				{ name: "Disabled", value: "" },
+				{ name: "1 day", value: 1 },
+				{ name: "2 days", value: 2 },
+				{ name: "3 days", value: 3 },
+				{ name: "7 days", value: 7 },
+				{ name: "14 days", value: 14 },
+				{ name: "30 days", value: 30 },
+				{ name: "60 days", value: 60 },
+			],
+		},
+		{
+			displayName: "Team Wait (Seconds)",
+			name: "team_wait",
+			type: "number",
+			default: 0,
+			description:
+				"Seconds to wait before escalating the incident alert to the team. Leave blank to disable escalating to the entire team.",
+		},
+		{
+			displayName: "URL",
+			name: "url",
+			type: "string",
+			default: "",
+			description: "URL or host address to monitor",
+		},
+		{
+			displayName: "Verify SSL",
+			name: "verify_ssl",
+			type: "boolean",
+			default: true,
+			description: "Whether to verify SSL certificates",
+		},
+	],
+};
+
+export const filterFields: INodeProperties = {
+	displayName: "Filters",
+	name: "filters",
+	type: "collection",
+	placeholder: "Add Filter",
+	default: {},
+	displayOptions: {
+		show: {
+			operation: ["getMany"],
+		},
+	},
+	options: [
+		{
+			displayName: "Name",
+			name: "pronounceable_name",
+			type: "string",
+			default: "",
+			description: "Filter by monitor name (partial match)",
+		},
+		{
+			displayName: "URL",
+			name: "url",
+			type: "string",
+			default: "",
+			description: "Filter by URL (partial match)",
+		},
+	],
+};
