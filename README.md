@@ -10,14 +10,14 @@
 
 # n8n-nodes-better-stack
 
-[![npm version](https://img.shields.io/npm/v/n8n-nodes-better-stack.svg)](https://www.npmjs.com/package/n8n-nodes-better-stack)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![n8n Community Node](https://img.shields.io/badge/n8n-Community%20Node-ff6d5a)](https://n8n.io)
-[![Better Stack](https://img.shields.io/badge/Better%20Stack-Uptime%20API-000000)](https://betterstack.com)
+[![CI](https://img.shields.io/github/actions/workflow/status/ThomasTartrau/n8n-nodes-better-stack/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/ThomasTartrau/n8n-nodes-better-stack/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/n8n-nodes-better-stack?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/n8n-nodes-better-stack)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![n8n](https://img.shields.io/badge/n8n-community_node-FF6D5A?style=for-the-badge&logo=n8n&logoColor=white)](https://n8n.io)
 
 **n8n community nodes for Better Stack Uptime API integration**
 
-[Installation](#installation) | [Configuration](#configuration) | [Nodes](#nodes) | [Features](#features) | [Examples](#examples)
+[Installation](#installation) | [Configuration](#configuration) | [Nodes](#nodes) | [Features](#features)
 
 </div>
 
